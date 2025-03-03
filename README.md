@@ -116,6 +116,12 @@ ansible-playbook -v -f 50 site.yml --tags k8s-installation
 ansible-playbook -v -f 50 site.yml --tags k8s-init
 ```
 
+#### join worker:
+
+```
+ansible-playbook -v -f 50 site.yml --tags k8s-join
+```
+
 #### run a simple web app on cluster and set ingress manifest:
 
 ```
@@ -128,11 +134,6 @@ ansible-playbook -v -f 50 site.yml --tags k8s-app
 ansible-playbook -v -f 50 site.yml --tags k8s-monitoring
 ```
 
-#### join worker:
-
-```
-ansible-playbook -v -f 50 site.yml --tags k8s-join
-```
 #### you should check your cluster
 ```
 kubectl cluster-info
@@ -148,5 +149,4 @@ grafana.sample.ir
 prom.sample.ir
 alert.sample.ir
 ```
-
 
