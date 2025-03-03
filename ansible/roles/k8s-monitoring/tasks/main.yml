@@ -1,66 +1,59 @@
+# 1. Create namespace for Metrics Server
+- name: Create namespace for Metrics Server
+  kubernetes.core.k8s:
+    name: metrics-server
+    api_version: v1
+    kind: Namespace
+    state: present
 
-- name: Install Metrics Server and Prometheus Stack
-    hosts: localhost
-        gather_facts: no
-            tasks:
-                  # 1. Create namespace for Metrics Server
-                  #     - name: Create namespace for Metrics Server
-                  #           kubernetes.core.k8s:
-                  #                   name: metrics-server
-                  #                           api_version: v1
-                  #                                   kind: Namespace
-                  #                                           state: present
-                  #
-                  #                                               # 2. Add Helm repo for Metrics Server
-                  #                                                   - name: Add Helm repo for Metrics Server
-                  #                                                         ansible.builtin.command:
-                  #                                                                 cmd: helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server
-                  #                                                                         chdir: "{{ ansible_env.HOME }}/app"
-                  #
-                  #                                                                             # 3. Update Helm repo
-                  #                                                                                 - name: Update Helm repos
-                  #                                                                                       ansible.builtin.command:
-                  #                                                                                               cmd: helm repo update
-                  #                                                                                                       chdir: "{{ ansible_env.HOME }}/app"
-                  #
-                  #                                                                                                           # 4. Get values from Metrics Server repo and save to file
-                  #                                                                                                               - name: Get values from Metrics Server chart
-                  #                                                                                                                     ansible.builtin.command:
-                  #                                                                                                                             cmd: helm show values metrics-server/metrics-server > "{{ ansible_env.HOME }}/metrics-server.values"
-                  #                                                                                                                                     chdir: "{{ ansible_env.HOME }}/app"
-                  #
-                  #                                                                                                                                         # 5. Install Metrics Server using Helm
-                  #                                                                                                                                             - name: Install Metrics Server
-                  #                                                                                                                                                   ansible.builtin.command:
-                  #                                                                                                                                                           cmd: helm install metrics-server metrics-server/metrics-server -n metrics-server --values "{{ ansible_env.HOME }}/metrics-server.values"
-                  #                                                                                                                                                                   chdir: "{{ ansible_env.HOME }}/app"
-                  #
-                  #                                                                                                                                                                       # 6. Add Helm repo for Prometheus Stack
-                  #                                                                                                                                                                           - name: Add Helm repo for Prometheus Stack
-                  #                                                                                                                                                                                 ansible.builtin.command:
-                  #                                                                                                                                                                                         cmd: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-                  #                                                                                                                                                                                                 chdir: "{{ ansible_env.HOME }}/app"
-                  #
-                  #                                                                                                                                                                                                     # 7. Update Helm repo for Prometheus
-                  #                                                                                                                                                                                                         - name: Update Prometheus Helm repo
-                  #                                                                                                                                                                                                               ansible.builtin.command:
-                  #                                                                                                                                                                                                                       cmd: helm repo update
-                  #                                                                                                                                                                                                                               chdir: "{{ ansible_env.HOME }}/app"
-                  #
-                  #                                                                                                                                                                                                                                   # 8. Install Prometheus Stack
-                  #                                                                                                                                                                                                                                       - name: Install Prometheus Stack
-                  #                                                                                                                                                                                                                                             ansible.builtin.command:
-                  #                                                                                                                                                                                                                                                     cmd: helm install kube-prometheus-stack --create-namespace --namespace monitoring prometheus-community/kube-prometheus-stack
-                  #                                                                                                                                                                                                                                                             chdir: "{{ ansible_env.HOME }}/app"
-                  #
-                  #                                                                                                                                                                                                                                                                 # 9. Check healthy pods in the monitoring namespace
-                  #                                                                                                                                                                                                                                                                     - name: Get pods in monitoring namespace
-                  #                                                                                                                                                                                                                                                                           kubernetes.core.k8s_facts:
-                  #                                                                                                                                                                                                                                                                                   namespace: monitoring
-                  #                                                                                                                                                                                                                                                                                         register: monitoring_pods
-                  #
-                  #                                                                                                                                                                                                                                                                                             - name: Show healthy pods
-                  #                                                                                                                                                                                                                                                                                                   ansible.builtin.debug:
-                  #                                                                                                                                                                                                                                                                                                           msg: "{{ monitoring_pods.resources | selectattr('status.phase', 'equal', 'Running') | map(attribute='metadata.name') | list }}"
-                  #
-                  #
+# 2. Add Helm repo for Metrics Server
+- name: Add Helm repo for Metrics Server
+  ansible.builtin.command:
+    cmd: helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server
+    chdir: "{{ ansible_env.HOME }}/app"
+
+# 3. Update Helm repo
+- name: Update Helm repos
+  ansible.builtin.command:
+    cmd: helm repo update
+    chdir: "{{ ansible_env.HOME }}/app"
+
+# 4. Get values from Metrics Server repo and save to file
+- name: Get values from Metrics Server chart
+  ansible.builtin.command:
+    cmd: helm show values metrics-server/metrics-server > "{{ ansible_env.HOME }}/metrics-server.values"
+    chdir: "{{ ansible_env.HOME }}/app"
+
+# 5. Install Metrics Server using Helm
+- name: Install Metrics Server
+  ansible.builtin.command:
+    cmd: helm install metrics-server metrics-server/metrics-server -n metrics-server --values "{{ ansible_env.HOME }}/metrics-server.values"
+    chdir: "{{ ansible_env.HOME }}/app"
+
+# 6. Add Helm repo for Prometheus Stack
+- name: Add Helm repo for Prometheus Stack
+  ansible.builtin.command:
+    cmd: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    chdir: "{{ ansible_env.HOME }}/app"
+
+# 7. Update Helm repo for Prometheus
+- name: Update Prometheus Helm repo
+  ansible.builtin.command:
+    cmd: helm repo update
+    chdir: "{{ ansible_env.HOME }}/app"
+
+# 8. Install Prometheus Stack
+- name: Install Prometheus Stack
+  ansible.builtin.command:
+    cmd: helm install kube-prometheus-stack --create-namespace --namespace monitoring prometheus-community/kube-prometheus-stack
+    chdir: "{{ ansible_env.HOME }}/app"
+
+# 9. Check healthy pods in the monitoring namespace
+- name: Get pods in monitoring namespace
+  kubernetes.core.k8s_facts:
+    namespace: monitoring
+  register: monitoring_pods
+
+- name: Show healthy pods
+  ansible.builtin.debug:
+    msg: "{{ monitoring_pods.resources | selectattr('status.phase', 'equal', 'Running') | map(attribute='metadata.name') | list }}"
