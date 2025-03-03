@@ -128,7 +128,11 @@ ansible-playbook -v -f 50 site.yml --tags k8s-app
 ansible-playbook -v -f 50 site.yml --tags k8s-monitoring
 ```
 
+#### join worker:
 
+```
+ansible-playbook -v -f 50 site.yml --tags k8s-join
+```
 #### you should check your cluster
 ```
 kubectl cluster-info
