@@ -1,27 +1,28 @@
+
 - name: Apply Deployment
   kubernetes.core.k8s:
     state: present
-    src: "{{ ansible_env.HOME }}/app/deployment.yml"
+    src: "{{ ansible_env.HOME }}/Practice/app/deployment.yml"
 
 - name: Apply Traffic Generator
   kubernetes.core.k8s:
     state: present
-    src: "{{ ansible_env.HOME }}/app/traffic-generator.yml"
+    src: "{{ ansible_env.HOME }}/Practice/app/traffic-generator.yml"
 
 - name: Apply Service
   kubernetes.core.k8s:
     state: present
-    src: "{{ ansible_env.HOME }}/app/svc.yml"
+    src: "{{ ansible_env.HOME }}/Practice/app/svc.yml"
 
 - name: Apply Ingress
   kubernetes.core.k8s:
     state: present
-    src: "{{ ansible_env.HOME }}/app/ing.yml"
+    src: "{{ ansible_env.HOME }}/Practice/app/ing.yml"
 
 - name: Apply HPA
   kubernetes.core.k8s:
     state: present
-    src: "{{ ansible_env.HOME }}/app/hpa.yml"
+    src: "{{ ansible_env.HOME }}/Practice/app/hpa.yml"
 
 - name: Check Deployment Status
   ansible.builtin.shell: "kubectl get deployments"

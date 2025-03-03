@@ -10,65 +10,69 @@
 - name: Add Helm repo for Metrics Server
   ansible.builtin.command:
     cmd: helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server
-    chdir: "{{ ansible_env.HOME }}/monitoring"
+    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
 # 3. Update Helm repo
 - name: Update Helm repos
   ansible.builtin.command:
     cmd: helm repo update
-    chdir: "{{ ansible_env.HOME }}/monitoring"
+    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
 # 4. Get values from Metrics Server repo and save to file
 - name: Get values from Metrics Server chart
   ansible.builtin.command:
-    cmd: helm show values metrics-server/metrics-server > "{{ ansible_env.HOME }}/metrics-server.values"
-    chdir: "{{ ansible_env.HOME }}/monitoring"
+    cmd: helm show values metrics-server/metrics-server > "{{ ansible_env.HOME }}/Practice/metrics-server.values"
+    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
 # 5. Install Metrics Server using Helm
 - name: Install Metrics Server
   ansible.builtin.command:
-    cmd: helm install metrics-server metrics-server/metrics-server -n metrics-server --values "{{ ansible_env.HOME }}/metrics-server.values"
-    chdir: "{{ ansible_env.HOME }}/monitoring"
+    cmd: helm install metrics-server metrics-server/metrics-server -n metrics-server --values "{{ ansible_env.HOME }}/Practice/metrics-server.values"
+    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
 # 6. Add Helm repo for Prometheus Stack
 - name: Add Helm repo for Prometheus Stack
   ansible.builtin.command:
     cmd: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-    chdir: "{{ ansible_env.HOME }}/monitoring"
+    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
 # 7. Update Helm repo for Prometheus
 - name: Update Prometheus Helm repo
   ansible.builtin.command:
     cmd: helm repo update
-    chdir: "{{ ansible_env.HOME }}/monitoring"
+    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
 # 8. Install Prometheus Stack
 - name: Install Prometheus Stack
   ansible.builtin.command:
     cmd: helm install kube-prometheus-stack --create-namespace --namespace monitoring prometheus-community/kube-prometheus-stack
-    chdir: "{{ ansible_env.HOME }}/monitoring"
+    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
+# 9. Apply ingress prometheus
 - name: Apply ingress prometheus
   kubernetes.core.k8s:
     state: present
-    src: "{{ ansible_env.HOME }}/monitoring/prom-ing.yml"
-    
+    src: "{{ ansible_env.HOME }}/Practice/monitoring/prom-ing.yml"
+
+# 10. Apply ingress garafana
 - name: Apply ingress garafana
   kubernetes.core.k8s:
     state: present
-    src: "{{ ansible_env.HOME }}/monitoring/garafana-ing.yml"
+    src: "{{ ansible_env.HOME }}/Practice/monitoring/garafana-ing.yml"
 
+# 11. Apply ingress alertmanager
 - name: Apply ingress alertmanager
   kubernetes.core.k8s:
     state: present
-    src: "{{ ansible_env.HOME }}/monitoring/alert-ing.yml"
+    src: "{{ ansible_env.HOME }}/Practice/monitoring/alert-ing.yml"
 
-# 9. Check healthy pods in the monitoring namespace
+# 12. Check healthy pods in the monitoring namespace
 - name: Get pods in monitoring namespace
   kubernetes.core.k8s_facts:
     namespace: monitoring
   register: monitoring_pods
 
+# 12. Show healthy pods
 - name: Show healthy pods
   ansible.builtin.debug:
     msg: "{{ monitoring_pods.resources | selectattr('status.phase', 'equal', 'Running') | map(attribute='metadata.name') | list }}"

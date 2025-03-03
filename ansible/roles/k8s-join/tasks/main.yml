@@ -1,5 +1,5 @@
 - name: Retrieve Join Command from Master
-  hosts: v-master
+  hosts: masters
   become: yes
   tasks:
     - name: Generate Kubernetes Join Command
@@ -16,12 +16,12 @@
   tasks:
     - name: Ensure Master is reachable
       wait_for:
-        host: "{{ hostvars['v-master'].ansible_host }}"
+        host: "{{ hostvars['master'].ansible_host }}"
         port: 6443
         timeout: 10
 
     - name: Join Worker to Cluster
-      shell: "{{ hostvars['v-master'].join_command }} >> /home/vagrant/node_joined.log"
+      shell: "{{ hostvars['worker'].join_command }} >> /home/vagrant/node_joined.log"
       args:
         chdir: /home/vagrant
         creates: /home/vagrant/node_joined.log

@@ -18,12 +18,12 @@
     owner: vagrant
           
 - name: "[TASK 4] Generate and save cluster join command"
-  hosts: v-master
+  hosts: master
   ansible.builtin.shell: kubeadm token create --print-join-command
   register: join_command
 
 - name: "[TASK 5] Save join command to file"
-  hosts: v-master
+  hosts: master
   ansible.builtin.copy:
     content: "{{ join_command.stdout }}"
     dest: /joincluster.sh

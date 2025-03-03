@@ -104,5 +104,5 @@
   ansible.builtin.blockinfile:
     path: /etc/hosts
     block: |
-          192.168.56.12   v-master
-          192.168.56.13   v- worker
+          192.168.56.12   master
+          192.168.56.13   worker
