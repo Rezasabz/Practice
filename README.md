@@ -71,11 +71,11 @@ sudo systemctl restart ssh.service
 ### install `Ansible`
 
 ```
-$ sudo apt update
-$ sudo apt install software-properties-common
-$ sudo add-apt-repository --yes --update ppa:ansible/ansible
-$ sudo apt install ansible
-$ ansible --version
+sudo apt update
+sudo apt install software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible
+ansible --version
 ```
 
 ### k8s installation with ansible:
