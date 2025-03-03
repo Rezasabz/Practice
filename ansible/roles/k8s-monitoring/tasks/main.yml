@@ -1,3 +1,37 @@
+- name: Apply Ingress Nginx Controller
+  command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.3.0/deploy/static/provider/cloud/deploy.yaml
+
+- name: Add Helm GPG key
+  shell: |
+    curl -fsSL https://baltocdn.com/helm/signing.asc -o /tmp/helm_signing.asc
+    gpg --dearmor /tmp/helm_signing.asc
+    mv /tmp/helm_signing.asc.gpg /usr/share/keyrings/helm.gpg
+  args:
+    creates: /usr/share/keyrings/helm.gpg
+
+- name: Add Helm repository
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main"
+    state: present
+
+- name: Install Helm
+  apt:
+    name: helm
+    state: present
+
+- name: Add Helm repository
+  command: echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
+  args:
+    creates: /etc/apt/sources.list.d/helm-stable-debian.list 
+
+- name: Update apt package index
+  apt:
+    update_cache: yes
+
+- name: Install Helm
+  apt:
+    name: helm
+
 # 1. Create namespace for Metrics Server
 - name: Create namespace for Metrics Server
   kubernetes.core.k8s:
@@ -10,70 +44,33 @@
 - name: Add Helm repo for Metrics Server
   ansible.builtin.command:
     cmd: helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server
-    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
 # 3. Update Helm repo
 - name: Update Helm repos
   ansible.builtin.command:
     cmd: helm repo update
-    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
-# 4. Get values from Metrics Server repo and save to file
-- name: Get values from Metrics Server chart
-  ansible.builtin.command:
-    cmd: helm show values metrics-server/metrics-server > "{{ ansible_env.HOME }}/Practice/metrics-server.values"
-    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
+- name: Copy metrics-server values file to master
+  copy:
+    src: /root/Practice/metrics-server.values
+    dest: /home/vagrant/metrics-server.values
 
 # 5. Install Metrics Server using Helm
 - name: Install Metrics Server
   ansible.builtin.command:
-    cmd: helm install metrics-server metrics-server/metrics-server -n metrics-server --values "{{ ansible_env.HOME }}/Practice/metrics-server.values"
-    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
+    cmd: helm install metrics-server metrics-server/metrics-server -n metrics-server --values /home/vagrant/metrics-server.values
 
 # 6. Add Helm repo for Prometheus Stack
 - name: Add Helm repo for Prometheus Stack
   ansible.builtin.command:
     cmd: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
 # 7. Update Helm repo for Prometheus
 - name: Update Prometheus Helm repo
   ansible.builtin.command:
     cmd: helm repo update
-    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
 
 # 8. Install Prometheus Stack
 - name: Install Prometheus Stack
   ansible.builtin.command:
     cmd: helm install kube-prometheus-stack --create-namespace --namespace monitoring prometheus-community/kube-prometheus-stack
-    chdir: "{{ ansible_env.HOME }}/Practice/monitoring"
-
-# 9. Apply ingress prometheus
-- name: Apply ingress prometheus
-  kubernetes.core.k8s:
-    state: present
-    src: "{{ ansible_env.HOME }}/Practice/monitoring/prom-ing.yml"
-
-# 10. Apply ingress garafana
-- name: Apply ingress garafana
-  kubernetes.core.k8s:
-    state: present
-    src: "{{ ansible_env.HOME }}/Practice/monitoring/garafana-ing.yml"
-
-# 11. Apply ingress alertmanager
-- name: Apply ingress alertmanager
-  kubernetes.core.k8s:
-    state: present
-    src: "{{ ansible_env.HOME }}/Practice/monitoring/alert-ing.yml"
-
-# 12. Check healthy pods in the monitoring namespace
-- name: Get pods in monitoring namespace
-  kubernetes.core.k8s_facts:
-    namespace: monitoring
-  register: monitoring_pods
-
-# 12. Show healthy pods
-- name: Show healthy pods
-  ansible.builtin.debug:
-    msg: "{{ monitoring_pods.resources | selectattr('status.phase', 'equal', 'Running') | map(attribute='metadata.name') | list }}"
-

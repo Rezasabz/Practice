@@ -10,9 +10,8 @@
 
 # Ex 1: Ungrouped hosts, specify before any group headers:
 [k8s-nodes]
-v-master
-v-worker
-
+master ansible_host=master
+#worker ansible_host=worker
 [masters]
 master ansible_ssh_user=vagrant
 

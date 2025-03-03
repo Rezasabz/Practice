@@ -3,15 +3,15 @@
   hosts: k8s-nodes
   become: yes
   vars:
-    MASTER_IP: "192.168.56.12"
+    MASTER_IP: "192.168.56.14"
     POD_NETWORK_CIDR: "192.168.0.0/16"
+    app_path: "{{ ansible_env.HOME }}/Practice/app"
 
   roles:
-     - k8s-installation
-     - k8s-init
-     - k8s-join
-     - k8s-app
-     - k8s-monitoring
+     - { role: k8s-installation, tags: ['k8s-installation'] }
+     - { role: k8s-init, tags: ['k8s-init'] }
+     - { role: k8s-join, tags: ['k8s-join'] }
+     - { role: k8s-monitoring, tags: ['k8s-monitoring'] }
 
   handlers:
    - name: Restart containerd

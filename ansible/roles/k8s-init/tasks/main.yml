@@ -1,14 +1,48 @@
+- name: "Enable IP Forwarding"
+  ansible.builtin.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    sysctl_set: yes
+    reload: yes
+
 - name: "[TASK 1] Initialize Kubernetes Cluster"
   shell: kubeadm init --apiserver-advertise-address={{ MASTER_IP }} --pod-network-cidr={{ POD_NETWORK_CIDR }}
+  when: inventory_hostname == 'master'
   args:
     creates: /etc/kubernetes/admin.conf
 
-- name: "[TASK 2] Set up kubectl for the current user"
-  command: "{{ item }}"
-  with_items:
-    - "mkdir -p $HOME/.kube"
-    - "cp /etc/kubernetes/admin.conf $HOME/.kube/config"
-    - "chown $(id -u):$(id -g) $HOME/.kube/config"
+- name: "[TASK 2] Create .kube directory"
+  file:
+    path: "$HOME/.kube"
+    state: directory
+    mode: '0755'
+  when: inventory_hostname == 'master'
+
+- name: "[TASK 2] Copy admin.conf to kube config"
+  copy:
+    src: "/etc/kubernetes/admin.conf"
+    dest: "$HOME/.kube/config"
+    remote_src: yes
+  when: inventory_hostname == 'master'
+
+- name: "[TASK 2] Change ownership of kube config"
+  file:
+    path: "$HOME/.kube/config"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_gid }}"
+    mode: '0600'
+  when: inventory_hostname == 'master'
+
+
+- name: "[TASK 3] Create .kube directory for vagrant user"
+  file:
+    path: /home/vagrant/.kube
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: '0755'
+  when: inventory_hostname == 'master'
 
 - name: "[TASK 3] Copy admin.conf to User's kube config"
   copy:
@@ -16,19 +50,23 @@
     dest: /home/vagrant/.kube/config
     remote_src: yes
     owner: vagrant
-          
+    group: vagrant
+    mode: '0600'
+  when: inventory_hostname == 'master'
+
+
 - name: "[TASK 4] Generate and save cluster join command"
-  hosts: master
-  ansible.builtin.shell: kubeadm token create --print-join-command
+  shell: kubeadm token create --print-join-command
   register: join_command
+  when: inventory_hostname == 'master'
 
 - name: "[TASK 5] Save join command to file"
-  hosts: master
   ansible.builtin.copy:
     content: "{{ join_command.stdout }}"
     dest: /joincluster.sh
     mode: '0755'
+  when: inventory_hostname == 'master'
 
 - name: "[TASK 6] install Pod network"
   shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-
+  when: inventory_hostname == 'master'
