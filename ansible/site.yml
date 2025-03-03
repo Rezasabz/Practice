@@ -1,0 +1,31 @@
+---
+- name: init
+  hosts: v-master
+  become: yes
+  vars:
+    MASTER_IP: "192.168.56.12"
+    POD_NETWORK_CIDR: "192.168.0.0/16"
+
+  roles:
+     - k8s-installation
+     - k8s-init
+     - k8s-app
+     - k8s-monitoring
+      #- master
+      # - kube-master
+      #- control-plane
+
+  handlers:
+   - name: Restart containerd
+     ansible.builtin.systemd:
+       name: containerd
+       state: restarted
+       enabled: yes
+  
+   - name: Load Kernel Modules
+     ansible.builtin.shell: |
+       modprobe overlay
+       modprobe br_netfilter
+  
+   - name: Apply sysctl settings
+     ansible.builtin.command: sysctl --system >/dev/null 2>&1

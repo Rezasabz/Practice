@@ -1,0 +1,29 @@
+- name: Configure Join Commands on Master Node
+  hosts: masters
+  become: yes
+  tasks:
+    - name: Retrieve Join Command
+      shell: kubeadm token create --print-join-command
+      register: join_command_raw
+
+    - name: Set Join Command
+      set_fact:
+        join_command: "{{ join_command_raw.stdout_lines[0] }}"
+
+- name: Join Worker Nodes
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Enable TCP port 6443 (On Master) is able to connect from Worker
+      wait_for: "host=192.168.56.10 port=6443 timeout=1"
+
+    - name: Set Join Command on Worker Nodes
+      set_fact:
+        join_command: "{{ hostvars['master'].join_command }}"
+    
+    - name: Join worker to cluster
+      shell: "{{ join_command }} >> node_joined.log"
+      args:
+        chdir: /home/vagrant
+        creates: node_joined.log
+

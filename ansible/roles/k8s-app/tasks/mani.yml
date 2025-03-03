@@ -1,0 +1,27 @@
+me: Deploy Kubernetes Application
+    hosts: localhost
+        gather_facts: no
+            tasks:
+                  - name: Apply Kubernetes Manifests
+                          kubernetes.core.k8s:
+                                    state: present
+                                              src: "{{ item }}"
+                                                      loop:
+                                                                - "{{ ansible_env.HOME }}/app/deployment.yml"
+                                                                          - "{{ ansible_env.HOME }}/app/traffic-generator.yml"
+                                                                                    - "{{ ansible_env.HOME }}/app/svc.yml"
+                                                                                              - "{{ ansible_env.HOME }}/app/ing.yml"
+                                                                                                        - "{{ ansible_env.HOME }}/app/hpa.yml"
+
+                                                                                                              - name: Check Kubernetes Resources Status
+                                                                                                                      ansible.builtin.shell: "kubectl get {{ item }}"
+                                                                                                                              register: status
+                                                                                                                                      loop:
+                                                                                                                                                - deployments
+                                                                                                                                                          - svc
+                                                                                                                                                                    - ing
+
+                                                                                                                                                                          - name: Show Kubernetes Resources Status
+                                                                                                                                                                                  ansible.builtin.debug:
+                                                                                                                                                                                            msg: "{{ item.stdout_lines }}"
+                                                                                                                                                                                                    loop: "{{ status.results }}"
