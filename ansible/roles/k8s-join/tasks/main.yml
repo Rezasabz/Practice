@@ -1,0 +1,27 @@
+- name: Retrieve Join Command from Master
+  hosts: v-master
+  become: yes
+  tasks:
+    - name: Generate Kubernetes Join Command
+      shell: kubeadm token create --print-join-command
+      register: join_command_raw
+
+    - name: Save Join Command as Fact
+      set_fact:
+        join_command: "{{ join_command_raw.stdout }}"
+
+- name: Join Worker Nodes to Cluster
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Ensure Master is reachable
+      wait_for:
+        host: "{{ hostvars['v-master'].ansible_host }}"
+        port: 6443
+        timeout: 10
+
+    - name: Join Worker to Cluster
+      shell: "{{ hostvars['v-master'].join_command }} >> /home/vagrant/node_joined.log"
+      args:
+        chdir: /home/vagrant
+        creates: /home/vagrant/node_joined.log

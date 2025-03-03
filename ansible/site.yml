@@ -1,6 +1,6 @@
 ---
-- name: init
-  hosts: v-master
+- name: init k8s
+  hosts: k8s-nodes
   become: yes
   vars:
     MASTER_IP: "192.168.56.12"
@@ -9,11 +9,9 @@
   roles:
      - k8s-installation
      - k8s-init
+     - k8s-join
      - k8s-app
      - k8s-monitoring
-      #- master
-      # - kube-master
-      #- control-plane
 
   handlers:
    - name: Restart containerd

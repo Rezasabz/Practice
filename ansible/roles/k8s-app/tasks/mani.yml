@@ -1,59 +1,48 @@
-# 1. Create namespace for Metrics Server
-- name: Create namespace for Metrics Server
+- name: Apply Deployment
   kubernetes.core.k8s:
-    name: metrics-server
-    api_version: v1
-    kind: Namespace
     state: present
+    src: "{{ ansible_env.HOME }}/app/deployment.yml"
 
-# 2. Add Helm repo for Metrics Server
-- name: Add Helm repo for Metrics Server
-  ansible.builtin.command:
-    cmd: helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server
-    chdir: "{{ ansible_env.HOME }}/app"
+- name: Apply Traffic Generator
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ ansible_env.HOME }}/app/traffic-generator.yml"
 
-# 3. Update Helm repo
-- name: Update Helm repos
-  ansible.builtin.command:
-    cmd: helm repo update
-    chdir: "{{ ansible_env.HOME }}/app"
+- name: Apply Service
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ ansible_env.HOME }}/app/svc.yml"
 
-# 4. Get values from Metrics Server repo and save to file
-- name: Get values from Metrics Server chart
-  ansible.builtin.command:
-    cmd: helm show values metrics-server/metrics-server > "{{ ansible_env.HOME }}/metrics-server.values"
-    chdir: "{{ ansible_env.HOME }}/app"
+- name: Apply Ingress
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ ansible_env.HOME }}/app/ing.yml"
 
-# 5. Install Metrics Server using Helm
-- name: Install Metrics Server
-  ansible.builtin.command:
-    cmd: helm install metrics-server metrics-server/metrics-server -n metrics-server --values "{{ ansible_env.HOME }}/metrics-server.values"
-    chdir: "{{ ansible_env.HOME }}/app"
+- name: Apply HPA
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ ansible_env.HOME }}/app/hpa.yml"
 
-# 6. Add Helm repo for Prometheus Stack
-- name: Add Helm repo for Prometheus Stack
-  ansible.builtin.command:
-    cmd: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-    chdir: "{{ ansible_env.HOME }}/app"
+- name: Check Deployment Status
+  ansible.builtin.shell: "kubectl get deployments"
+  register: deployment_status
 
-# 7. Update Helm repo for Prometheus
-- name: Update Prometheus Helm repo
-  ansible.builtin.command:
-    cmd: helm repo update
-    chdir: "{{ ansible_env.HOME }}/app"
-
-# 8. Install Prometheus Stack
-- name: Install Prometheus Stack
-  ansible.builtin.command:
-    cmd: helm install kube-prometheus-stack --create-namespace --namespace monitoring prometheus-community/kube-prometheus-stack
-    chdir: "{{ ansible_env.HOME }}/app"
-
-# 9. Check healthy pods in the monitoring namespace
-- name: Get pods in monitoring namespace
-  kubernetes.core.k8s_facts:
-    namespace: monitoring
-  register: monitoring_pods
-
-- name: Show healthy pods
+- name: Show Deployment Status
   ansible.builtin.debug:
-    msg: "{{ monitoring_pods.resources | selectattr('status.phase', 'equal', 'Running') | map(attribute='metadata.name') | list }}"
+    msg: "{{ deployment_status.stdout_lines }}"
+
+- name: Check Service Status
+  ansible.builtin.shell: "kubectl get svc"
+  register: svc_status
+
+- name: Show Service Status
+  ansible.builtin.debug:
+    msg: "{{ svc_status.stdout_lines }}"
+
+- name: Check Ingress Status
+  ansible.builtin.shell: "kubectl get ing"
+  register: ing_status
+
+- name: Show Ingress Status
+  ansible.builtin.debug:
+    msg: "{{ ing_status.stdout_lines }}"
