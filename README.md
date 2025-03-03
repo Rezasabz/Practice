@@ -1,4 +1,4 @@
-nstall Vrtualbox & Vagrant
+## install Vrtualbox & Vagrant
 
 #### Import GPG key for VirtualBox repository packages.
 
