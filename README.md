@@ -64,7 +64,7 @@ vagrant ssh-config >> ~/.ssh/config
 ```
 sudo systemctl restart ssh.service
 ```
-### change master ip
+### Modify the master and worker IPs in the Ansible configuration files
 ```
 NEW_MASTER_IP=$(vagrant ssh master -c "ip -4 addr show | grep '192.168' | awk '{print \$2}' | cut -d'/' -f1" | tr -d '\r')
 sed -i "s/^    MASTER_IP: \".*\"/    MASTER_IP: \"$NEW_IP\"/" ../ansible/site.yml
@@ -91,7 +91,7 @@ ansible --version
 
 ### k8s installation with ansible:
 
-**you should change inventory file:**
+**You should modify the inventory file.:**
 ```
 vim ansible/hosts
 
@@ -133,7 +133,7 @@ ansible-playbook -i hosts -v -f 50 site.yml --tags k8s-init
 ansible-playbook -i hosts -v -f 50 site.yml --tags k8s-join
 ```
 
-#### run a simple web app on cluster and set ingress manifest:
+#### Deploy a simple web app on the cluster and configure an Ingress manifest.:
 
 ```
 cd app
@@ -165,7 +165,7 @@ we use of wrk. it's a HTTP benchmarking tool
 ```
 apk add wrk
 ```
-for start testing we should use of isc-service so pay attention to below command
+for start testing we should use of hello-app-service so pay attention to below command
 ```
 wrk -c 5 -t 5 -d 300s -H "Connection: Close" http://hello-app-service:8080
 ```
