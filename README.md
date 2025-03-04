@@ -45,7 +45,7 @@ vagrant up
 ```
 
 
-### show vms
+### show VMs
 ```
 vagrant global-status
 ```
@@ -55,7 +55,7 @@ vagrant global-status
 563dabd  worker1 virtualbox running /home/mgr/Practice/vagrant
 ```
 
-### add vm's vagrant ssh to host ssh config:
+### Modify the VM's Vagrant SSH settings in the host's SSH configuration.:
 ```
 vagrant ssh-config >> ~/.ssh/config
 ```
