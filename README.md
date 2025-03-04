@@ -183,7 +183,7 @@ http://hello-app-service:8080 => our service
 
 you should see
 
-Running 5m test @ http://isc-service:80
+Running 5m test @ http://hello-app-service:8080
   5 threads and 5 connections
 You will see that the number of pods increases as resource consumption increases and after finish requests the number of pods will be decries.
 
