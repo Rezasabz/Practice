@@ -114,23 +114,23 @@ sudo vim /etc/hosts
 [IP] worker
 ```
 
-### run ansible playbook file:
+### run ansible playbook files:
 
 #### install k8s all dependencies :
 ```
-ansible-playbook -v -f 50 site.yml --tags k8s-installation
+ansible-playbook -i hosts -f 50 -v site.yml --tags k8s-installation
 ```
 
 #### init master nodes and join workers to master node:
 
 ```
-ansible-playbook -v -f 50 site.yml --tags k8s-init
+ansible-playbook -i hosts -v -f 50 site.yml --tags k8s-init
 ```
 
 #### join worker:
 
 ```
-ansible-playbook -v -f 50 site.yml --tags k8s-join
+ansible-playbook -i hosts -v -f 50 site.yml --tags k8s-join
 ```
 
 #### run a simple web app on cluster and set ingress manifest:
