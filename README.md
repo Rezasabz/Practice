@@ -59,6 +59,11 @@ vagrant global-status
 ```
 vagrant ssh-config >> ~/.ssh/config
 ```
+Now you can test the SSH command on the VMs
+```
+ssh master
+ssh worker
+```
 
 ### restart ssh.service
 ```
