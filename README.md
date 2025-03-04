@@ -45,7 +45,7 @@ vagrant up
 ```
 
 
-### show vm's
+### show vms
 ```
 vagrant global-status
 ```
