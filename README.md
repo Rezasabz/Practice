@@ -156,6 +156,29 @@ kubectl apply -f grafana-ing.yml -f prom-ing.yml -f alert-ing.yml
 kubectl cluster-info
 ```
 
+## HPA test
+go to traffic-generator container
+```
+kubectl exec -it traffic-generator -- /bin/sh
+```
+we use of wrk. it's a HTTP benchmarking tool
+```
+apk add wrk
+```
+for start testing we should use of isc-service so pay attention to below command
+```
+wrk -c 5 -t 5 -d 300s -H "Connection: Close" http://hello-app-service:8080
+```
+-c 5 => 5 Connections
+-t 5 => 5 treads
+-d 300s => duration
+http://hello-app-service:8080 => our service
+
+you should see
+
+Running 5m test @ http://isc-service:80
+  5 threads and 5 connections
+You will see that the number of pods increases as resource consumption increases and after finish requests the number of pods will be decries.
 
 ## Test
 
