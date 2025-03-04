@@ -110,8 +110,8 @@ worker
 ```
 sudo vim /etc/hosts
 
-192.168.56.12 master
-192.168.56.13 worker
+[IP] master
+[IP] worker
 ```
 
 ### run ansible playbook file:
@@ -159,11 +159,11 @@ kubectl cluster-info
 
 ## Test
 
-### test URLs on local browser:
+### test URLs :
 ```
-sample.ir
-grafana.sample.ir
-prom.sample.ir
-alert.sample.ir
+curl sample.ir:[ingress port]
+curl grafana.sample.ir:[ingress port]
+curl prom.sample.ir:[ingress port]
+curl alert.sample.ir:[ingress port]
 ```
 
