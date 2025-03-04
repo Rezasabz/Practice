@@ -91,9 +91,9 @@ ansible --version
 
 ### k8s installation with ansible:
 
-**you should change your inventory:**
+**you should change inventory file:**
 ```
-sudo vim /etc/ansible/hosts
+vim ansible/hosts
 
 [k8s-nodes]
 master
