@@ -74,13 +74,13 @@ ssh worker
 ### Modify the master and worker IPs in the Ansible configuration files
 ```
 NEW_MASTER_IP=$(vagrant ssh master -c "ip -4 addr show | grep '192.168' | awk '{print \$2}' | cut -d'/' -f1" | tr -d '\r')
-sed -i "s/^    MASTER_IP: \".*\"/    MASTER_IP: \"$NEW_IP\"/" ../ansible/site.yml
+sed -i "s/^    MASTER_IP: \".*\"/    MASTER_IP: \"$NEW_IP\"/" ansible/site.yml
 ```
 
 ```
 NEW_WORKER_IP=$(vagrant ssh worker -c "ip -4 addr show | grep '192.168' | awk '{print \$2}' | cut -d'/' -f1" | tr -d '\r')
-sed -i "/block: |/,+2 s|.*master|          $NEW_MASTER_IP   master|" ../ansible/roles/k8s-installation/tasks/main.yml
-sed -i "/block: |/,+2 s|.*worker|          $NEW_WORKER_IP   worker|" ../ansible/roles/k8s-installation/tasks/main.yml
+sed -i "/block: |/,+2 s|.*master|          $NEW_MASTER_IP   master|" ansible/roles/k8s-installation/tasks/main.yml
+sed -i "/block: |/,+2 s|.*worker|          $NEW_WORKER_IP   worker|" ansible/roles/k8s-installation/tasks/main.yml
 
 ```
 
