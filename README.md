@@ -59,16 +59,18 @@ vagrant global-status
 ```
 vagrant ssh-config >> ~/.ssh/config
 ```
+
+### restart ssh.service
+```
+sudo systemctl restart ssh.service
+```
+
 Now you can test the SSH command on the VMs
 ```
 ssh master
 ssh worker
 ```
 
-### restart ssh.service
-```
-sudo systemctl restart ssh.service
-```
 ### Modify the master and worker IPs in the Ansible configuration files
 ```
 NEW_MASTER_IP=$(vagrant ssh master -c "ip -4 addr show | grep '192.168' | awk '{print \$2}' | cut -d'/' -f1" | tr -d '\r')
