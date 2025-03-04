@@ -1,6 +1,17 @@
 - name: Apply Ingress Nginx Controller
   command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.3.0/deploy/static/provider/cloud/deploy.yaml
 
+- name: Patch ingress-nginx service to NodePort
+  kubernetes.core.k8s:
+    kind: Service
+    name: ingress-nginx-controller
+    namespace: ingress-nginx
+    resource_version: null
+    merge_type: merge
+    definition:
+      spec:
+        type: NodePort
+
 - name: Add Helm GPG key
   shell: |
     curl -fsSL https://baltocdn.com/helm/signing.asc -o /tmp/helm_signing.asc
